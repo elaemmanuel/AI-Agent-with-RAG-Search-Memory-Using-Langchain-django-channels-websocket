@@ -1,0 +1,1 @@
+web: daphne -b 0.0.0.0 -p $PORT chat_agent_project.asgi:application

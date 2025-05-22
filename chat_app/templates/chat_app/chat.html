@@ -1,0 +1,338 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Help: AgenteL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            /* Image for the general page background */
+            background-image: url('{% static "images/angenteLBody.jpg" %}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center; 
+            background-attachment: fixed;
+            background-color: #1a202c; /* Fallback dark cool blue-gray if image doesn't load */
+            font-family: sans-serif;
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background-image: url('{% static "images/angeteLContainer.jpg" %}');
+            background-size: cover; 
+            background-repeat: no-repeat;
+            background-position: center
+            background-attachment: fixed;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex-grow: 1; /* Allow content to grow and push footer down */
+        }
+        h2 {
+            color: #d1d5db;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #chat-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            clear: both;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        .agent-message {
+            background-color: #e9ecef;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        #message-input {
+            flex-grow: 1;
+            border-radius: 20px 0 0 20px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            margin-right: -1px;
+        }
+        #send-button {
+            border-radius: 0 20px 20px 0;
+            white-space: nowrap;
+        }
+
+        /* Styles for the new upload elements */
+        #upload-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #eaf6ff;
+            border-radius: 5px;
+            border: 1px solid #cce5ff;
+        }
+        #upload-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        #file-display {
+            flex-grow: 1;
+            font-size: 0.9em;
+            color: #333;
+        }
+        #file-input {
+            display: none;
+        }
+        .upload-message {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        .upload-message.success { background-color: #d4edda; color: #155724; }
+        .upload-message.error { background-color: #f8d7da; color: #721c24; }
+        .upload-message.info { background-color: #d1ecf1; color: #0c5460; }
+
+        /* Footer styles */
+        .footer {
+            margin-top: auto; /* Push footer to the bottom */
+            padding: 15px 0;
+            text-align: center;
+            color: #d1d5db; /* Light text color for footer */
+            font-size: 0.9em;
+            background-color: rgba(0, 0, 0, 0.62); /* Semi-transparent dark background */
+        }
+        .footer a {
+            color: #ffffff; /* White link color */
+            text-decoration: underline;
+        }
+        .footer a:hover {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Get Help: <span id="room-name">AgenteL</span></h2>
+        <div id="chat-container">
+            <div class="message agent-message">Hello! How can I assist you today?</div>
+        </div>
+
+        <div id="upload-section">
+            <button id="upload-button" title="Upload Document">+</button>
+            <input type="file" id="file-input" accept=".pdf">
+            <div id="file-display">No file selected.</div>
+        </div>
+        <div class="upload-message" id="upload-status-message"></div>
+
+        <div class="input-group">
+            <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
+            <button id="send-button" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+
+<script>
+    const roomName = "AgenteL";
+    const chatContainer = document.getElementById('chat-container');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const roomNameDisplay = document.getElementById('room-name');
+    if (roomNameDisplay) {
+        roomNameDisplay.textContent = roomName;
+    }
+
+    // New elements for upload
+    const uploadButton = document.getElementById('upload-button');
+    const fileInput = document.getElementById('file-input');
+    const fileDisplay = document.getElementById('file-display');
+    const uploadStatusMessage = document.getElementById('upload-status-message');
+
+    let selectedFileForUpload = null; // To hold the file selected for upload
+
+
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const chatSocket = new WebSocket(
+        wsProtocol + window.location.host + '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        const message = data.message;
+        let messageDiv = document.createElement('div');
+
+        if (message.startsWith("Error:")) {
+            messageDiv.className = 'message alert alert-danger';
+            messageDiv.textContent = message;
+        } else {
+            messageDiv.className = 'message agent-message';
+            messageDiv.textContent = message;
+        }
+
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+
+    chatSocket.onopen = () => {
+        console.log("Connection established!");
+        // Initial message from agent is now hardcoded in HTML for immediate display
+    };
+
+    chatSocket.onclose = () => {
+        console.log('Connection closed!');
+    };
+
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            sendButton.click();
+        }
+    });
+
+    // --- New JavaScript for Upload Feature ---
+
+    // Trigger file input click when upload button is clicked
+    uploadButton.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', (event) => {
+        selectedFileForUpload = event.target.files;
+        if (selectedFileForUpload.length > 0) {
+            fileDisplay.textContent = `Selected: ${selectedFileForUpload.item(0).name}`;
+            showUploadStatus('Click "Send" to upload this document.', 'info');
+        } else {
+            fileDisplay.textContent = 'No file selected.';
+            showUploadStatus('', '');
+        }
+    });
+
+    // Modify send button to also handle document upload if a file is selected
+    sendButton.addEventListener('click', async () => {
+        const message = messageInput.value;
+        const hasSelectedFile = selectedFileForUpload && selectedFileForUpload.length > 0;
+
+        if (hasSelectedFile && message.trim() === '') {
+            await uploadSelectedDocument();
+        } else if (message.trim() !== '') {
+            let userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = message;
+            chatContainer.appendChild(userMessageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            chatSocket.send(JSON.stringify({ 'message': message }));
+
+            messageInput.value = '';
+            selectedFileForUpload = null;
+            fileInput.value = '';
+            fileDisplay.textContent = 'No file selected.';
+            showUploadStatus('', '');
+        } else if (hasSelectedFile && message.trim() !== '') {
+            let userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = message;
+            chatContainer.appendChild(userMessageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInput.value = '';
+            await uploadSelectedDocument();
+        } else {
+            showUploadStatus('Please type a message or select a document to upload.', 'error');
+        }
+    });
+
+
+    async function uploadSelectedDocument() {
+        if (!selectedFileForUpload || selectedFileForUpload.length === 0) {
+            showUploadStatus('No file selected for upload.', 'error');
+            return;
+        }
+
+        const file = selectedFileForUpload.item(0);
+
+        if (file.type !== 'application/pdf') {
+            showUploadStatus('Only PDF files are supported for upload.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('document', file);
+
+        showUploadStatus(`Uploading "${file.name}"...`, 'info');
+
+        try {
+            const response = await fetch('/upload_document/', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showUploadStatus(data.message + " You can now query the document.", 'success');
+            } else {
+                showUploadStatus(data.error || 'An unknown error occurred during upload.', 'error');
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            showUploadStatus('Network error or server unavailable. Please try again.', 'error');
+        } finally {
+            selectedFileForUpload = null;
+            fileInput.value = '';
+            fileDisplay.textContent = 'No file selected.';
+            showUploadStatus('', '');
+        }
+    }
+
+    function showUploadStatus(msg, type) {
+        uploadStatusMessage.textContent = msg;
+        uploadStatusMessage.className = `upload-message ${type}`;
+    }
+
+</script>
+
+    <footer class="footer">
+        Copyright © AgenteL | <a class="text-decoration-none" href="https://x.com/home" target="_blank">developed by eL</a>
+    </footer>
+
+</body>
+</html>
