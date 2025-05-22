@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-uaf%@*-m1#n6sor!2@2q!y2v((x(9lmuauxf1%n%au&oe3vcto'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['agentel-app.onrender.com','127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -176,3 +176,9 @@ GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
 
 #Start server with
 ## DJANGO_SETTINGS_MODULE=chat_agent_project.settings daphne -b 0.0.0.0 -p 8000 chat_agent_project.asgi:application
+
+#database internal url on render
+#postgresql://chat_agent_prod_user:7PevKV2wuFG78fmA0YBmgRCXcw56z7kx@dpg-d0no34emcj7s739gqlng-a/chat_agent_prod_db
+
+#redis on render
+#redis://red-d0no7rfdiees73dduik0:6379
