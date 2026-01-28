@@ -1,23 +1,37 @@
 # AI Conversational Agent with RAG Memory
 
 **Recruiter Hook:**  
-MSc Computer Science student building real-time AI applications with Django, LangChain, and RAG. Live demo available at [agentel-app.onrender.com](https://agentel-app.onrender.com).
+MSc Computer Science student building real-time AI applications using Django, LangChain, WebSockets, and Retrieval-Augmented Generation (RAG). Live demo available at https://agentel-app.onrender.com
 
 ## Overview
-This project is an AI conversational agent that remembers past interactions and uses **Retrieval-Augmented Generation (RAG)** to answer questions with context from previous chats. It provides a real-time chat interface and leverages LangChain for intelligent RAG-based responses. The backend is built with Django and Django Channels, supporting async communication and scalable memory storage.
+This project is a real-time AI conversational agent that maintains persistent chat memory and supports **Retrieval-Augmented Generation (RAG)** for grounded, context-aware responses.
+The system uses Django Channels and WebSockets for asynchronous communication, LangChain for agent orchestration, and PostgreSQL for durable conversation history.
+
+The architecture is designed to support dynamic document ingestion and retrieval, with a production-ready RAG pipeline implemented in the backend.
 
 ## Features
-- **RAG Search with LangChain:** Retrieves relevant information to provide context-aware answers.
-- **Persistent Chat Memory:** Stores past conversations for continuity in interactions.
-- **Real-time UI via WebSockets:** Enables instant communication between the frontend and backend.
-- **Django Backend with Async Support:** Handles real-time requests efficiently and integrates with a PostgreSQL database.
-- **Hosted Demo:** Available live at [AI Agent Demo](https://agentel-app.onrender.com).
+- **Retrieval-Augmented Generation (RAG):** Documents are embedded and stored in a FAISS vector store, allowing relevant context to be retrieved and injected into the LLM prompt before response generation.
+- **Persistent Chat Memory:** Conversation history is stored in PostgreSQL and reloaded per session, enabling continuity across messages and reconnections.
+- **Real-Time Communication (WebSockets):** Django Channels enables low-latency, bidirectional communication for a responsive chat experience.
+- **Async & Scalable Backend:** HNon-blocking LLM calls and background-safe execution using async consumers and thread pools.
+- **Live Hosted Demo:** Deployed on Render with PostgreSQL-backed memory persistence.
 
 ## Tech Stack
 - **Backend:** Python, Django, Django REST Framework, Django Channels, Async
 - **Frontend:** JavaScript, WebSockets
 - **Database:** PostgreSQL (hosted on Render)
-- **AI & Automation:** LangChain, RAG
+- **AI & Automation:** LangChain, FAISS, HuggingFace Embeddings, RAG
+
+## Architecture Review
+- User sends a message via WebSocket.
+- Django Channels consumer receives the message asynchronously.
+- LangChain agent evaluates whether to:
+    - respond directly,
+    - retrieve context from documents (RAG),
+    - or use external search tools.
+- Retrieved context (if any) is injected into the LLM prompt.
+- The generated response is sent back to the client in real time.
+- Conversation history is persisted in PostgreSQL.
 
 ## How to Run Locally
 1. Clone the repository:
@@ -54,11 +68,15 @@ python manage.py runserver
 ## Demo
 - Live demo hosted at: https://agentel-app.onrender.com
 
-## Future Improvements
-- Improve frontend UI for a better user experience.
-- Add user authentication to separate multiple users’ memory.
-- Extend AI capabilities with additional LLMs and datasets.
-- Add analytics to track conversation patterns.
+## Deployment Notes (Important)
+The backend includes functionality for uploading documents and dynamically rebuilding the FAISS vector store for RAG.
+However, **document upload is disabled in the live demo** due to hosting constraints on the free deployment tier. The RAG pipeline itself is fully implemented and functional when run locally or on a production-tier environment.
 
+## Future Improvements
+- Enable multi-user authentication and isolated memory per user.
+- Add streaming responses for improved UX.
+- Extend document ingestion to support multiple file formats.
+- Introduce monitoring and analytics for conversation patterns.
+- Deploy on a production-tier environment with dynamic document ingestion enabled.
 
 
